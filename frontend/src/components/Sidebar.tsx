@@ -11,6 +11,7 @@ interface SidebarProps {
   ratings: RatingsResponse
   onAdd: (id: EngineId) => void
   onAddAll: () => void
+  onAddAllVoices: (id: EngineId) => void
   onRemove: (variantId: string) => void
   onVoiceChange: (variantId: string, voice: string) => void
   onSpeedChange: (variantId: string, speed: number) => void
@@ -35,12 +36,12 @@ export function Sidebar({
   ratings,
   onAdd,
   onAddAll,
+  onAddAllVoices,
   onRemove,
   onVoiceChange,
   onSpeedChange,
 }: SidebarProps) {
   const engineFor = (id: EngineId): Engine | undefined => engines.find((engine) => engine.id === id)
-  const variantCountByEngine = (id: EngineId): number => variants.filter((v) => v.engine === id).length
 
   const variantCards = (
     <>
@@ -52,7 +53,6 @@ export function Sidebar({
             key={variant.id}
             engine={engine}
             variant={variant}
-            removable={variantCountByEngine(variant.engine) > 1}
             generating={generating}
             onRemove={() => onRemove(variant.id)}
             onVoiceChange={(voice) => onVoiceChange(variant.id, voice)}
@@ -90,33 +90,55 @@ export function Sidebar({
           Обрати всі
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-[8px]">
+      <div className="flex flex-col gap-[6px]">
         {engines
           .filter((engine) => engine.available)
           .map((engine) => {
             const color = ENGINE_COLORS[engine.id]
+            const usedVoices = new Set(
+              variants.filter((variant) => variant.engine === engine.id).map((variant) => variant.voice),
+            )
+            const missingVoices = engine.voices.filter((voice) => !usedVoices.has(voice.id)).length
             return (
-              <button
+              <div
                 key={engine.id}
-                type="button"
-                onClick={() => onAdd(engine.id)}
-                aria-label={`Додати ${engine.label}`}
-                className="flex items-center gap-[8px] rounded-[10px] border border-border-default bg-bg-base px-[10px] py-[8px] text-left transition-colors duration-150 hover:border-text-tertiary"
+                className="flex items-center gap-[6px] rounded-[10px] border border-border-default bg-bg-base pl-[10px] pr-[6px] transition-colors duration-150 hover:border-text-tertiary"
               >
-                <span
-                  aria-hidden="true"
-                  className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] text-[10px] font-semibold"
-                  style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)` }}
+                <button
+                  type="button"
+                  onClick={() => onAdd(engine.id)}
+                  aria-label={`Додати ${engine.label}`}
+                  className="flex min-w-0 flex-1 items-center gap-[8px] py-[8px] text-left"
                 >
-                  {ENGINE_MONOGRAMS[engine.id]}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-text-secondary">
-                  {engine.label}
-                </span>
-                <span className="shrink-0 text-text-tertiary">
-                  <PlusIcon />
-                </span>
-              </button>
+                  <span
+                    aria-hidden="true"
+                    className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] text-[10px] font-semibold"
+                    style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)` }}
+                  >
+                    {ENGINE_MONOGRAMS[engine.id]}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-text-secondary">
+                    {engine.label}
+                  </span>
+                  <span className="shrink-0 text-text-tertiary">
+                    <PlusIcon />
+                  </span>
+                </button>
+
+                {/* add every remaining voice of this engine at once */}
+                {engine.voices.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => onAddAllVoices(engine.id)}
+                    disabled={missingVoices === 0}
+                    title={`Додати всі голоси (${engine.voices.length})`}
+                    aria-label={`Додати всі голоси ${engine.label}`}
+                    className="shrink-0 rounded-[7px] border border-border-default px-[6px] py-[3px] font-mono text-[10px] text-text-secondary transition-colors duration-150 hover:border-text-tertiary hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    +{engine.voices.length}
+                  </button>
+                )}
+              </div>
             )
           })}
       </div>
@@ -199,7 +221,6 @@ export function Sidebar({
                 key={variant.id}
                 engine={engine}
                 variant={variant}
-                removable={variantCountByEngine(variant.engine) > 1}
                 generating={generating}
                 compact
                 onRemove={() => onRemove(variant.id)}

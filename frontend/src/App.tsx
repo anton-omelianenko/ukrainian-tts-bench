@@ -128,12 +128,28 @@ export default function App() {
   }
 
   const removeVariant = (variantId: string) => {
+    setVariants((previous) => previous.filter((variant) => variant.id !== variantId))
+  }
+
+  /** Add every voice of one engine as its own variant (skipping voices already present). */
+  const addAllVoices = (id: EngineId) => {
+    const engine = engines.find((candidate) => candidate.id === id)
+    if (!engine || !engine.available) return
     setVariants((previous) => {
-      const target = previous.find((variant) => variant.id === variantId)
-      if (!target) return previous
-      // keep at least one variant per engine
-      if (previous.filter((variant) => variant.engine === target.engine).length <= 1) return previous
-      return previous.filter((variant) => variant.id !== variantId)
+      const present = new Set(
+        previous.filter((variant) => variant.engine === id).map((variant) => variant.voice),
+      )
+      const missing = engine.voices.filter((voice) => !present.has(voice.id))
+      if (missing.length === 0) return previous
+      return [
+        ...previous,
+        ...missing.map((voice) => ({
+          id: newVariantId(),
+          engine: id,
+          voice: voice.id,
+          speed: engine.default_speed,
+        })),
+      ]
     })
   }
 
@@ -182,6 +198,7 @@ export default function App() {
         ratings={ratings}
         onAdd={addVariant}
         onAddAll={addAllVariants}
+        onAddAllVoices={addAllVoices}
         onRemove={removeVariant}
         onVoiceChange={(variantId, voice) => updateVariant(variantId, { voice })}
         onSpeedChange={(variantId, speed) => updateVariant(variantId, { speed })}

@@ -24,7 +24,7 @@ OUTPUTS_DIR = REPO_ROOT / "outputs"
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
 
 MAX_TEXT_LEN = 1500
-MAX_ENGINES_PER_REQUEST = 12  # variants: same engine may repeat with different voices
+MAX_ENGINES_PER_REQUEST = 24  # variants: same engine may repeat with different voices
 HISTORY_LIMIT = 50
 
 app = FastAPI(title="Ukrainian TTS Bench")

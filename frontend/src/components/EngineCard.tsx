@@ -6,7 +6,6 @@ import { XIcon } from '../icons'
 interface EngineCardProps {
   engine: Engine
   variant: Variant
-  removable: boolean
   generating: boolean
   compact?: boolean
   onRemove: () => void
@@ -17,7 +16,6 @@ interface EngineCardProps {
 export function EngineCard({
   engine,
   variant,
-  removable,
   generating,
   compact = false,
   onRemove,
@@ -75,8 +73,8 @@ export function EngineCard({
           style={{ backgroundColor: engine.available ? 'var(--color-success)' : 'var(--color-error)' }}
         />
 
-        {/* remove variant */}
-        {removable && !compact && (
+        {/* remove variant — any variant can be removed, including the last one */}
+        {!compact && (
           <button
             type="button"
             onClick={onRemove}
