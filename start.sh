@@ -6,6 +6,11 @@ cd "$(dirname "$0")"
 VENV=.venv
 PORT="${PORT:-8320}"
 
+if ! command -v espeak-ng >/dev/null 2>&1; then
+  echo "▸ installing espeak-ng (system package)"
+  sudo apt-get install -y espeak-ng
+fi
+
 if [ ! -d "$VENV" ]; then
   echo "▸ creating venv"
   python3 -m venv "$VENV"

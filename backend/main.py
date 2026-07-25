@@ -47,6 +47,13 @@ class GenerateRequest(BaseModel):
     engines: list[EngineRequest] = Field(min_length=1, max_length=MAX_ENGINES_PER_REQUEST)
 
 
+class RateRequest(BaseModel):
+    """Rate one result of a generation: 1 = like, -1 = dislike, 0 = clear."""
+
+    index: int = Field(ge=0)
+    rating: int = Field(ge=-1, le=1)
+
+
 # ---------------------------------------------------------------------------
 # Synthesis
 
@@ -64,6 +71,7 @@ def _run_one(engine_id: str, voice: str | None, speed: float | None, text: str, 
             "generation_ms": 0,
             "audio_duration_sec": 0.0,
             "sample_rate": 0,
+            "rating": 0,
         }
 
     resolved_voice = engine.resolve_voice(voice)
@@ -86,6 +94,7 @@ def _run_one(engine_id: str, voice: str | None, speed: float | None, text: str, 
             "generation_ms": generation_ms,
             "audio_duration_sec": round(audio_info.frames / audio_info.samplerate, 3),
             "sample_rate": meta["sample_rate"],
+            "rating": 0,
         }
     except Exception as exc:  # noqa: BLE001 — per-engine isolation
         out_path.unlink(missing_ok=True)
@@ -99,6 +108,7 @@ def _run_one(engine_id: str, voice: str | None, speed: float | None, text: str, 
             "generation_ms": generation_ms,
             "audio_duration_sec": 0.0,
             "sample_rate": 0,
+            "rating": 0,
         }
 
 
@@ -178,8 +188,7 @@ def api_audio(filename: str) -> FileResponse:
     return FileResponse(str(path), media_type="audio/wav", filename=filename)
 
 
-@app.get("/api/history")
-def api_history() -> dict[str, Any]:
+def _load_generations() -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for sidecar in OUTPUTS_DIR.glob("*.json"):
         try:
@@ -187,7 +196,63 @@ def api_history() -> dict[str, Any]:
         except (json.JSONDecodeError, OSError):
             continue
     items.sort(key=lambda item: item.get("created_at", ""), reverse=True)
-    return {"items": items[:HISTORY_LIMIT]}
+    return items
+
+
+@app.get("/api/history")
+def api_history() -> dict[str, Any]:
+    return {"items": _load_generations()[:HISTORY_LIMIT]}
+
+
+@app.post("/api/generations/{gen_id}/rate")
+def api_rate(gen_id: str, request: RateRequest) -> dict[str, Any]:
+    """Like (1) / dislike (-1) / clear (0) one result of a generation."""
+    if not re.fullmatch(r"[0-9a-f]{32}", gen_id):
+        raise HTTPException(status_code=404, detail="not found")
+    sidecar = OUTPUTS_DIR / f"{gen_id}.json"
+    if not sidecar.is_file():
+        raise HTTPException(status_code=404, detail="not found")
+
+    try:
+        generation = json.loads(sidecar.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise HTTPException(status_code=500, detail="corrupt generation record") from exc
+
+    results = generation.get("results", [])
+    if request.index >= len(results):
+        raise HTTPException(status_code=422, detail="result index out of range")
+
+    results[request.index]["rating"] = request.rating
+    sidecar.write_text(json.dumps(generation, ensure_ascii=False, indent=2), encoding="utf-8")
+    return generation
+
+
+@app.get("/api/ratings")
+def api_ratings() -> dict[str, Any]:
+    """Aggregate likes/dislikes per engine and per engine+voice across all generations."""
+    by_engine: dict[str, dict[str, int]] = {}
+    by_voice: dict[str, dict[str, Any]] = {}
+
+    for generation in _load_generations():
+        for result in generation.get("results", []):
+            rating = result.get("rating", 0)
+            if rating == 0:
+                continue
+            engine_id = result.get("engine", "")
+            voice = result.get("voice") or ""
+            key = f"{engine_id}:{voice}"
+            engine_stats = by_engine.setdefault(engine_id, {"likes": 0, "dislikes": 0})
+            voice_stats = by_voice.setdefault(
+                key, {"engine": engine_id, "voice": voice, "likes": 0, "dislikes": 0}
+            )
+            bucket = "likes" if rating > 0 else "dislikes"
+            engine_stats[bucket] += 1
+            voice_stats[bucket] += 1
+
+    return {
+        "by_engine": [{"engine": engine, **stats} for engine, stats in by_engine.items()],
+        "by_voice": list(by_voice.values()),
+    }
 
 
 # ---------------------------------------------------------------------------

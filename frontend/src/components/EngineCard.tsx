@@ -32,7 +32,7 @@ export function EngineCard({
 
   const cardStyle: CSSProperties = {
     borderColor: color,
-    backgroundColor: `color-mix(in srgb, ${color} 6%, var(--bg-base))`,
+    backgroundColor: `color-mix(in srgb, ${color} 6%, var(--color-bg-base))`,
   }
 
   return (
@@ -72,7 +72,7 @@ export function EngineCard({
         <span
           aria-hidden="true"
           className={['mt-[3px] h-[8px] w-[8px] shrink-0 rounded-full', generating ? 'animate-pulse-soft' : ''].join(' ')}
-          style={{ backgroundColor: engine.available ? 'var(--success)' : 'var(--error)' }}
+          style={{ backgroundColor: engine.available ? 'var(--color-success)' : 'var(--color-error)' }}
         />
 
         {/* remove variant */}

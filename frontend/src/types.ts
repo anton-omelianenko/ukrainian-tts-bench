@@ -50,6 +50,9 @@ export interface GenerateRequest {
   engines: GenerateEngineRequest[]
 }
 
+/** 1 = like, -1 = dislike, 0 = not rated. */
+export type Rating = 1 | 0 | -1
+
 export interface GenerationResult {
   engine: EngineId
   voice: string | null
@@ -59,6 +62,24 @@ export interface GenerationResult {
   generation_ms: number | null
   audio_duration_sec: number | null
   sample_rate: number | null
+  rating?: Rating
+}
+
+export type RatingFilter = 'all' | 'liked' | 'disliked'
+
+export interface EngineRatingStats {
+  engine: EngineId
+  likes: number
+  dislikes: number
+}
+
+export interface VoiceRatingStats extends EngineRatingStats {
+  voice: string
+}
+
+export interface RatingsResponse {
+  by_engine: EngineRatingStats[]
+  by_voice: VoiceRatingStats[]
 }
 
 export interface Generation {

@@ -91,6 +91,38 @@ export function XIcon(props: IconProps) {
   )
 }
 
+export function ThumbUpIcon({ filled = false, ...props }: IconProps & { filled?: boolean }) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M5 14V6.6l2.7-4.3c.2-.3.6-.4.9-.2.5.2.8.8.7 1.3L9 6.2h3.6c.9 0 1.6.8 1.4 1.7l-.9 4.7c-.1.7-.7 1.2-1.4 1.2H5Zm0 0H2.6c-.3 0-.6-.3-.6-.6V7.2c0-.3.3-.6.6-.6H5"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill={filled ? 'currentColor' : 'none'}
+        fillOpacity={filled ? 0.18 : 0}
+      />
+    </svg>
+  )
+}
+
+export function ThumbDownIcon({ filled = false, ...props }: IconProps & { filled?: boolean }) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M11 2v7.4l-2.7 4.3c-.2.3-.6.4-.9.2-.5-.2-.8-.8-.7-1.3L7 9.8H3.4C2.5 9.8 1.8 9 2 8.1l.9-4.7C3 2.7 3.6 2.2 4.3 2.2H11Zm0 0h2.4c.3 0 .6.3.6.6v5.6c0 .3-.3.6-.6.6H11"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill={filled ? 'currentColor' : 'none'}
+        fillOpacity={filled ? 0.18 : 0}
+      />
+    </svg>
+  )
+}
+
 export function PlusIcon(props: IconProps) {
   return (
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>

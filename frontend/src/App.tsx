@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Engine, EngineId, Generation, Variant } from './types'
-import { fetchEngines, fetchHistory, postGenerate } from './api'
+import type { Engine, EngineId, Generation, Rating, RatingFilter, RatingsResponse, Variant } from './types'
+import { fetchEngines, fetchHistory, fetchRatings, postGenerate, postRating } from './api'
 import { newVariantId } from './engines'
 import { Sidebar } from './components/Sidebar'
 import { Composer } from './components/Composer'
@@ -35,6 +35,16 @@ export default function App() {
   const [history, setHistory] = useState<Generation[]>([])
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [generateError, setGenerateError] = useState<string | null>(null)
+  const [historyFilter, setHistoryFilter] = useState<RatingFilter>('all')
+  const [ratings, setRatings] = useState<RatingsResponse>({ by_engine: [], by_voice: [] })
+
+  const refreshRatings = useCallback(async () => {
+    try {
+      setRatings(await fetchRatings())
+    } catch {
+      // stats are non-critical
+    }
+  }, [])
 
   const refreshHistory = useCallback(async () => {
     try {
@@ -60,10 +70,35 @@ export default function App() {
       }
     })()
     void refreshHistory()
+    void refreshRatings()
     return () => {
       cancelled = true
     }
-  }, [refreshHistory])
+  }, [refreshHistory, refreshRatings])
+
+  // Rate one result: optimistic local update, then persist + refresh stats.
+  const rate = async (generationId: string, index: number, rating: Rating) => {
+    const patch = (generation: Generation): Generation =>
+      generation.id !== generationId
+        ? generation
+        : {
+            ...generation,
+            results: generation.results.map((result, position) =>
+              position === index ? { ...result, rating } : result,
+            ),
+          }
+
+    setHistory((previous) => previous.map(patch))
+    setResults((previous) => (previous ? patch(previous) : previous))
+
+    try {
+      await postRating(generationId, index, rating)
+      void refreshRatings()
+    } catch {
+      // persistence failed — resync from the server
+      void refreshHistory()
+    }
+  }
 
   const addVariant = (id: EngineId) => {
     const engine = engines.find((candidate) => candidate.id === id)
@@ -124,6 +159,7 @@ export default function App() {
       })
       setResults(generation)
       void refreshHistory()
+      void refreshRatings()
     } catch (error) {
       setGenerateError(error instanceof Error ? error.message : 'Помилка з’єднання')
     } finally {
@@ -143,6 +179,7 @@ export default function App() {
         variants={variants}
         generating={generating}
         loading={enginesLoading}
+        ratings={ratings}
         onAdd={addVariant}
         onAddAll={addAllVariants}
         onRemove={removeVariant}
@@ -205,6 +242,7 @@ export default function App() {
                       result={result}
                       engineLabel={labelFor(result.engine)}
                       staggerIndex={index}
+                      onRate={(rating) => void rate(results.id, index, rating)}
                     />
                   ))}
                 </div>
@@ -215,7 +253,10 @@ export default function App() {
               items={history}
               engines={engines}
               expandedId={expandedId}
+              filter={historyFilter}
+              onFilterChange={setHistoryFilter}
               onToggleExpand={(id) => setExpandedId((previous) => (previous === id ? null : id))}
+              onRate={(generationId, index, rating) => void rate(generationId, index, rating)}
             />
           </div>
         </div>

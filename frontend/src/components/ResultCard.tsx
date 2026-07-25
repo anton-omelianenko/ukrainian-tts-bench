@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react'
-import type { GenerationResult } from '../types'
+import type { GenerationResult, Rating } from '../types'
 import { ENGINE_COLORS, ENGINE_MONOGRAMS } from '../engines'
 import { AudioPlayer } from './AudioPlayer'
+import { ThumbDownIcon, ThumbUpIcon } from '../icons'
 
 const ENGINE_LABELS: Record<GenerationResult['engine'], string> = {
   supertonic: 'Supertonic',
@@ -14,9 +15,46 @@ interface ResultCardProps {
   result: GenerationResult
   engineLabel?: string
   staggerIndex?: number
+  /** Omitted when the card is not rateable (e.g. no generation id available). */
+  onRate?: (rating: Rating) => void
 }
 
-export function ResultCard({ result, engineLabel, staggerIndex = 0 }: ResultCardProps) {
+function RatingButtons({ rating, onRate }: { rating: Rating; onRate: (rating: Rating) => void }) {
+  return (
+    <div className="flex items-center gap-[2px]">
+      <button
+        type="button"
+        onClick={() => onRate(rating === 1 ? 0 : 1)}
+        aria-label="Подобається"
+        aria-pressed={rating === 1}
+        className={[
+          'flex h-[28px] w-[28px] items-center justify-center rounded-[8px] transition-colors duration-150',
+          rating === 1
+            ? 'bg-success text-white shadow-[0_1px_2px_rgba(0,0,0,0.12)]'
+            : 'text-text-tertiary hover:bg-bg-sunken hover:text-text-secondary',
+        ].join(' ')}
+      >
+        <ThumbUpIcon filled={rating === 1} />
+      </button>
+      <button
+        type="button"
+        onClick={() => onRate(rating === -1 ? 0 : -1)}
+        aria-label="Не подобається"
+        aria-pressed={rating === -1}
+        className={[
+          'flex h-[28px] w-[28px] items-center justify-center rounded-[8px] transition-colors duration-150',
+          rating === -1
+            ? 'bg-error text-white shadow-[0_1px_2px_rgba(0,0,0,0.12)]'
+            : 'text-text-tertiary hover:bg-bg-sunken hover:text-text-secondary',
+        ].join(' ')}
+      >
+        <ThumbDownIcon filled={rating === -1} />
+      </button>
+    </div>
+  )
+}
+
+export function ResultCard({ result, engineLabel, staggerIndex = 0, onRate }: ResultCardProps) {
   const color = ENGINE_COLORS[result.engine]
   const label = engineLabel ?? ENGINE_LABELS[result.engine]
 
@@ -45,6 +83,7 @@ export function ResultCard({ result, engineLabel, staggerIndex = 0 }: ResultCard
     )
   }
 
+  const rating: Rating = result.rating ?? 0
   const metadata: string[] = []
   if (result.generation_ms != null) metadata.push(`${result.generation_ms} ms`)
   if (result.audio_duration_sec != null) metadata.push(`${result.audio_duration_sec.toFixed(1)}s`)
@@ -72,6 +111,11 @@ export function ResultCard({ result, engineLabel, staggerIndex = 0 }: ResultCard
         {metadata.length > 0 && (
           <span className="ml-auto shrink-0 font-mono text-[12px] tabular-nums text-text-tertiary">
             {metadata.join(' · ')}
+          </span>
+        )}
+        {onRate && (
+          <span className={metadata.length > 0 ? 'shrink-0' : 'ml-auto shrink-0'}>
+            <RatingButtons rating={rating} onRate={onRate} />
           </span>
         )}
       </div>

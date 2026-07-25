@@ -51,7 +51,7 @@ export function Composer({ text, generating, canGenerate, onTextChange, onGenera
       </div>
 
       {/* textarea */}
-      <div className="relative rounded-[14px] border border-border-default bg-bg-base transition-shadow duration-150 focus-within:border-accent focus-within:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_8%,transparent)]">
+      <div className="relative rounded-[14px] border border-border-default bg-bg-base transition-shadow duration-150 focus-within:border-accent focus-within:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
         <textarea
           ref={textareaRef}
           value={text}

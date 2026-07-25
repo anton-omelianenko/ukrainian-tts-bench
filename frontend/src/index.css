@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --bg-base: #ffffff;
-  --bg-elevated: #f7f7f8;
-  --bg-sunken: #efeff1;
-  --border-default: #e4e4e7;
-  --border-emphasis: #d4d4d8;
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-  --text-tertiary: #a1a1aa;
-  --accent: #101010;
-  --accent-dim: #3f3f46;
-  --accent-ink: #ffffff;
-  --engine-supertonic: #7c3aed;
-  --engine-silero: #0891b2;
-  --engine-mms: #059669;
-  --engine-espeak: #d97706;
-  --success: #059669;
-  --error: #dc2626;
-  --warning: #d97706;
+  /* Tailwind v4 only generates background, text and border utilities from
+     the --color-* namespace, so every palette token lives there. */
+  --color-bg-base: #ffffff;
+  --color-bg-elevated: #f7f7f8;
+  --color-bg-sunken: #efeff1;
+  --color-border-default: #e4e4e7;
+  --color-border-emphasis: #d4d4d8;
+  --color-text-primary: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-tertiary: #a1a1aa;
+  --color-accent: #101010;
+  --color-accent-dim: #3f3f46;
+  --color-accent-ink: #ffffff;
+  --color-engine-supertonic: #7c3aed;
+  --color-engine-silero: #0891b2;
+  --color-engine-mms: #059669;
+  --color-engine-espeak: #d97706;
+  --color-success: #059669;
+  --color-error: #dc2626;
+  --color-warning: #d97706;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
 
@@ -55,8 +57,8 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--bg-base);
-  color: var(--text-primary);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
@@ -68,7 +70,7 @@ body {
 /* ---- scrollbars: 8px, thumb border-emphasis, transparent track ---- */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-emphasis) transparent;
+  scrollbar-color: var(--color-border-emphasis) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -77,7 +79,7 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: var(--border-emphasis);
+  background-color: var(--color-border-emphasis);
   border-radius: 8px;
 }
 
@@ -86,7 +88,7 @@ body {
 }
 
 ::selection {
-  background-color: color-mix(in srgb, var(--accent) 24%, transparent);
+  background-color: color-mix(in srgb, var(--color-accent) 24%, transparent);
 }
 
 /* ---- accent range input (engine speed slider) ---- */
@@ -97,10 +99,10 @@ input[type='range'].speed-range {
   border-radius: 4px;
   background: linear-gradient(
     to right,
-    var(--accent) 0%,
-    var(--accent) var(--fill, 50%),
-    var(--border-default) var(--fill, 50%),
-    var(--border-default) 100%
+    var(--color-accent) 0%,
+    var(--color-accent) var(--fill, 50%),
+    var(--color-border-default) var(--fill, 50%),
+    var(--color-border-default) 100%
   );
   outline: none;
   cursor: pointer;
@@ -112,7 +114,7 @@ input[type='range'].speed-range::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-accent);
   border: none;
   transition: transform 120ms ease-out;
 }
@@ -125,7 +127,7 @@ input[type='range'].speed-range::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-accent);
   border: none;
   transition: transform 120ms ease-out;
 }
@@ -142,9 +144,9 @@ input[type='range'].speed-range::-moz-range-track {
 select.dark-select {
   appearance: none;
   background-color: #ffffff;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--color-border-default);
   border-radius: 10px;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   font-size: 12px;
   padding: 6px 28px 6px 10px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2352525b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -155,15 +157,15 @@ select.dark-select {
 }
 
 select.dark-select:hover {
-  border-color: var(--text-tertiary);
+  border-color: var(--color-text-tertiary);
 }
 
 select.dark-select:focus {
   outline: none;
-  border-color: var(--text-tertiary);
+  border-color: var(--color-text-tertiary);
 }
 
 select.dark-select option {
   background-color: #ffffff;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }

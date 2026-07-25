@@ -3,10 +3,10 @@ import type { EngineId } from './types'
 export const ENGINE_ORDER: EngineId[] = ['supertonic', 'silero', 'mms', 'espeak']
 
 export const ENGINE_COLORS: Record<EngineId, string> = {
-  supertonic: 'var(--engine-supertonic)',
-  silero: 'var(--engine-silero)',
-  mms: 'var(--engine-mms)',
-  espeak: 'var(--engine-espeak)',
+  supertonic: 'var(--color-engine-supertonic)',
+  silero: 'var(--color-engine-silero)',
+  mms: 'var(--color-engine-mms)',
+  espeak: 'var(--color-engine-espeak)',
 }
 
 export const ENGINE_MONOGRAMS: Record<EngineId, string> = {

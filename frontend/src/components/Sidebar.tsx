@@ -1,13 +1,14 @@
-import type { Engine, EngineId, Variant } from '../types'
+import type { Engine, EngineId, RatingsResponse, Variant } from '../types'
 import { ENGINE_COLORS, ENGINE_MONOGRAMS } from '../engines'
 import { EngineCard } from './EngineCard'
-import { PlusIcon } from '../icons'
+import { PlusIcon, ThumbDownIcon, ThumbUpIcon } from '../icons'
 
 interface SidebarProps {
   engines: Engine[]
   variants: Variant[]
   generating: boolean
   loading: boolean
+  ratings: RatingsResponse
   onAdd: (id: EngineId) => void
   onAddAll: () => void
   onRemove: (variantId: string) => void
@@ -31,6 +32,7 @@ export function Sidebar({
   variants,
   generating,
   loading,
+  ratings,
   onAdd,
   onAddAll,
   onRemove,
@@ -121,6 +123,51 @@ export function Sidebar({
     </div>
   )
 
+  // rating leaderboard: engine+voice combos the user rated, best first
+  const rated = [...ratings.by_voice]
+    .filter((stats) => stats.likes > 0 || stats.dislikes > 0)
+    .sort((a, b) => b.likes - a.likes - (b.dislikes - a.dislikes))
+
+  const ratingsPanel = rated.length > 0 && (
+    <div className="mt-[18px] border-t border-border-default pt-[14px]">
+      <p className="mb-[8px] px-[2px] text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+        Мої оцінки
+      </p>
+      <div className="flex flex-col gap-[4px]">
+        {rated.map((stats) => {
+          const color = ENGINE_COLORS[stats.engine]
+          return (
+            <div
+              key={`${stats.engine}:${stats.voice}`}
+              className="flex items-center gap-[8px] rounded-[8px] px-[6px] py-[4px] text-[11px]"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] text-[9px] font-semibold"
+                style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)` }}
+              >
+                {ENGINE_MONOGRAMS[stats.engine]}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-mono text-text-secondary">{stats.voice}</span>
+              {stats.likes > 0 && (
+                <span className="flex shrink-0 items-center gap-[3px] text-success">
+                  <ThumbUpIcon />
+                  {stats.likes}
+                </span>
+              )}
+              {stats.dislikes > 0 && (
+                <span className="flex shrink-0 items-center gap-[3px] text-error">
+                  <ThumbDownIcon />
+                  {stats.dislikes}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+
   return (
     <>
       {/* desktop: fixed 300px sidebar */}
@@ -134,6 +181,7 @@ export function Sidebar({
           </p>
           <div className="flex flex-col gap-[10px]">{variantCards}</div>
           {addPicker}
+          {ratingsPanel}
         </div>
       </aside>
 
