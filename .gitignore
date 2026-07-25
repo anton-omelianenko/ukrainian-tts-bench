@@ -16,3 +16,6 @@ scratch/
 # os / editor
 .DS_Store
 *.swp
+
+# tooling
+.omc/
