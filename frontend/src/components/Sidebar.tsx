@@ -9,6 +9,7 @@ interface SidebarProps {
   generating: boolean
   loading: boolean
   onAdd: (id: EngineId) => void
+  onAddAll: () => void
   onRemove: (variantId: string) => void
   onVoiceChange: (variantId: string, voice: string) => void
   onSpeedChange: (variantId: string, speed: number) => void
@@ -31,6 +32,7 @@ export function Sidebar({
   generating,
   loading,
   onAdd,
+  onAddAll,
   onRemove,
   onVoiceChange,
   onSpeedChange,
@@ -67,11 +69,25 @@ export function Sidebar({
   )
 
   // "add engine" picker: one tile per available engine, tap to append a variant
+  const missingCount = engines.filter(
+    (engine) => engine.available && !variants.some((variant) => variant.engine === engine.id),
+  ).length
+
   const addPicker = (
     <div className="mt-[14px]">
-      <p className="mb-[8px] px-[2px] text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-        Додати рушій
-      </p>
+      <div className="mb-[8px] flex items-center justify-between px-[2px]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+          Додати рушій
+        </p>
+        <button
+          type="button"
+          onClick={onAddAll}
+          disabled={missingCount === 0}
+          className="text-[11px] font-medium text-text-secondary underline decoration-border-default underline-offset-2 transition-colors duration-150 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:no-underline"
+        >
+          Обрати всі
+        </button>
+      </div>
       <div className="grid grid-cols-2 gap-[8px]">
         {engines
           .filter((engine) => engine.available)

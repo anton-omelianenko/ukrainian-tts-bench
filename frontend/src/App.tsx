@@ -74,6 +74,24 @@ export default function App() {
     ])
   }
 
+  const addAllVariants = () => {
+    setVariants((previous) => {
+      const missing = engines.filter(
+        (engine) => engine.available && !previous.some((variant) => variant.engine === engine.id),
+      )
+      if (missing.length === 0) return previous
+      return [
+        ...previous,
+        ...missing.map((engine) => ({
+          id: newVariantId(),
+          engine: engine.id,
+          voice: engine.default_voice,
+          speed: engine.default_speed,
+        })),
+      ]
+    })
+  }
+
   const removeVariant = (variantId: string) => {
     setVariants((previous) => {
       const target = previous.find((variant) => variant.id === variantId)
@@ -126,6 +144,7 @@ export default function App() {
         generating={generating}
         loading={enginesLoading}
         onAdd={addVariant}
+        onAddAll={addAllVariants}
         onRemove={removeVariant}
         onVoiceChange={(variantId, voice) => updateVariant(variantId, { voice })}
         onSpeedChange={(variantId, speed) => updateVariant(variantId, { speed })}
