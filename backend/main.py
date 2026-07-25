@@ -24,7 +24,7 @@ OUTPUTS_DIR = REPO_ROOT / "outputs"
 FRONTEND_DIST = REPO_ROOT / "frontend" / "dist"
 
 MAX_TEXT_LEN = 1500
-MAX_ENGINES_PER_REQUEST = 4
+MAX_ENGINES_PER_REQUEST = 12  # variants: same engine may repeat with different voices
 HISTORY_LIMIT = 50
 
 app = FastAPI(title="Ukrainian TTS Bench")
@@ -51,7 +51,7 @@ class GenerateRequest(BaseModel):
 # Synthesis
 
 
-def _run_one(engine_id: str, voice: str | None, speed: float | None, text: str, gen_id: str) -> dict[str, Any]:
+def _run_one(engine_id: str, voice: str | None, speed: float | None, text: str, gen_id: str, index: int) -> dict[str, Any]:
     """Run one engine; never raises — errors are returned in the result dict."""
     engine = get_engine(engine_id)
     if engine is None:
@@ -68,7 +68,8 @@ def _run_one(engine_id: str, voice: str | None, speed: float | None, text: str, 
 
     resolved_voice = engine.resolve_voice(voice)
     resolved_speed = engine.clamp_speed(speed)
-    out_path = OUTPUTS_DIR / f"{gen_id}-{engine_id}.wav"
+    # index in the filename keeps duplicate engine+voice variants from clobbering each other
+    out_path = OUTPUTS_DIR / f"{gen_id}-{index}-{engine_id}.wav"
 
     started = time.perf_counter()
     try:
@@ -144,9 +145,9 @@ def api_generate(request: GenerateRequest) -> dict[str, Any]:
     futures = [
         _executor.submit(
             _run_one, engine_request.engine, engine_request.voice, engine_request.speed,
-            request.text, gen_id,
+            request.text, gen_id, index,
         )
-        for engine_request in request.engines
+        for index, engine_request in enumerate(request.engines)
     ]
     results = [future.result() for future in futures]
 
@@ -163,12 +164,12 @@ def api_generate(request: GenerateRequest) -> dict[str, Any]:
     return response
 
 
-_UUID_FILE_RE = re.compile(r"^[0-9a-f]{32}(?:-[a-z0-9]+)?\.wav$")
+_UUID_FILE_RE = re.compile(r"^[0-9a-f]{32}(?:-[0-9a-z]+)*\.wav$")
 
 
 @app.get("/api/audio/{filename}")
 def api_audio(filename: str) -> FileResponse:
-    # Path-traversal guard: only plain flat uuid[-engine].wav names.
+    # Path-traversal guard: only plain flat uuid[-index-engine].wav names.
     if not _UUID_FILE_RE.match(filename):
         raise HTTPException(status_code=404, detail="not found")
     path = OUTPUTS_DIR / filename

@@ -27,7 +27,7 @@ export function ResultCard({ result, engineLabel, staggerIndex = 0 }: ResultCard
   if (!result.ok) {
     return (
       <div
-        className="animate-card-in rounded-[14px] border border-error/40 bg-bg-elevated p-[18px]"
+        className="animate-card-in rounded-[14px] border border-error/40 bg-bg-base p-[18px]"
         style={animationStyle}
       >
         <div className="flex items-center gap-[10px]">
@@ -52,7 +52,7 @@ export function ResultCard({ result, engineLabel, staggerIndex = 0 }: ResultCard
 
   return (
     <div
-      className="animate-card-in rounded-[14px] border border-border-default bg-bg-elevated p-[18px]"
+      className="animate-card-in rounded-[14px] border border-border-default bg-bg-base p-[18px]"
       style={animationStyle}
     >
       <div className="mb-[14px] flex items-center gap-[10px]">

@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --bg-base: #0a0a0b;
-  --bg-elevated: #131316;
-  --bg-sunken: #060607;
-  --border-default: #232327;
-  --border-emphasis: #34343b;
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #5f5f66;
-  --accent: #e8ff47;
-  --accent-dim: #b8cc2e;
-  --accent-ink: #131305;
-  --engine-supertonic: #8b5cf6;
-  --engine-silero: #22d3ee;
-  --engine-mms: #34d399;
-  --engine-espeak: #fbbf24;
-  --success: #34d399;
-  --error: #f87171;
-  --warning: #fbbf24;
+  --bg-base: #ffffff;
+  --bg-elevated: #f7f7f8;
+  --bg-sunken: #efeff1;
+  --border-default: #e4e4e7;
+  --border-emphasis: #d4d4d8;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-tertiary: #a1a1aa;
+  --accent: #101010;
+  --accent-dim: #3f3f46;
+  --accent-ink: #ffffff;
+  --engine-supertonic: #7c3aed;
+  --engine-silero: #0891b2;
+  --engine-mms: #059669;
+  --engine-espeak: #d97706;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
 
@@ -99,8 +99,8 @@ input[type='range'].speed-range {
     to right,
     var(--accent) 0%,
     var(--accent) var(--fill, 50%),
-    var(--bg-sunken) var(--fill, 50%),
-    var(--bg-sunken) 100%
+    var(--border-default) var(--fill, 50%),
+    var(--border-default) 100%
   );
   outline: none;
   cursor: pointer;
@@ -138,16 +138,16 @@ input[type='range'].speed-range::-moz-range-track {
   background: transparent;
 }
 
-/* ---- dark native select ---- */
+/* ---- native select ---- */
 select.dark-select {
   appearance: none;
-  background-color: var(--bg-sunken);
+  background-color: #ffffff;
   border: 1px solid var(--border-default);
   border-radius: 10px;
   color: var(--text-primary);
   font-size: 12px;
   padding: 6px 28px 6px 10px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a1a1aa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2352525b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   cursor: pointer;
@@ -155,15 +155,15 @@ select.dark-select {
 }
 
 select.dark-select:hover {
-  border-color: var(--border-emphasis);
+  border-color: var(--text-tertiary);
 }
 
 select.dark-select:focus {
   outline: none;
-  border-color: var(--border-emphasis);
+  border-color: var(--text-tertiary);
 }
 
 select.dark-select option {
-  background-color: var(--bg-elevated);
+  background-color: #ffffff;
   color: var(--text-primary);
 }

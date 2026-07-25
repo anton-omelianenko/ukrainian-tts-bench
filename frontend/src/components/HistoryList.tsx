@@ -39,22 +39,22 @@ export function HistoryList({ items, engines, expandedId, onToggleExpand }: Hist
               <button
                 type="button"
                 onClick={() => onToggleExpand(item.id)}
-                className="flex w-full items-center gap-[12px] px-[16px] py-[12px] text-left transition-colors duration-150 hover:bg-bg-base/60"
+                className="flex w-full items-center gap-[12px] px-[16px] py-[12px] text-left transition-colors duration-150 hover:bg-bg-base"
               >
                 <span className="min-w-0 flex-1 truncate text-[13px] text-text-primary">
                   {truncate(item.text, 80)}
                 </span>
                 <span className="flex shrink-0 items-center gap-[6px]">
-                  {item.results.map((result) => (
+                  {item.results.map((result, index) => (
                     <span
-                      key={result.engine}
+                      key={`${result.engine}-${index}`}
                       className="rounded-[6px] px-[6px] py-[2px] font-mono text-[10px] leading-tight"
                       style={{
                         color: ENGINE_COLORS[result.engine],
                         backgroundColor: `color-mix(in srgb, ${ENGINE_COLORS[result.engine]} 12%, transparent)`,
                       }}
                     >
-                      {result.engine}
+                      {result.voice ? `${result.engine}:${result.voice}` : result.engine}
                     </span>
                   ))}
                 </span>
@@ -67,7 +67,7 @@ export function HistoryList({ items, engines, expandedId, onToggleExpand }: Hist
                 <div className="flex flex-col gap-[10px] border-t border-border-default p-[14px]">
                   {item.results.map((result, index) => (
                     <ResultCard
-                      key={result.engine}
+                      key={`${result.engine}-${index}`}
                       result={result}
                       engineLabel={labelFor(result.engine)}
                       staggerIndex={index}

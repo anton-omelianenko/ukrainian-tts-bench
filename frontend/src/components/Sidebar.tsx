@@ -1,14 +1,17 @@
-import type { Engine, EngineId, SelectionMap } from '../types'
+import type { Engine, EngineId, Variant } from '../types'
+import { ENGINE_COLORS, ENGINE_MONOGRAMS } from '../engines'
 import { EngineCard } from './EngineCard'
+import { PlusIcon } from '../icons'
 
 interface SidebarProps {
   engines: Engine[]
-  selection: SelectionMap
+  variants: Variant[]
   generating: boolean
   loading: boolean
-  onToggle: (id: EngineId) => void
-  onVoiceChange: (id: EngineId, voice: string) => void
-  onSpeedChange: (id: EngineId, speed: number) => void
+  onAdd: (id: EngineId) => void
+  onRemove: (variantId: string) => void
+  onVoiceChange: (variantId: string, voice: string) => void
+  onSpeedChange: (variantId: string, speed: number) => void
 }
 
 function Wordmark() {
@@ -24,27 +27,35 @@ function Wordmark() {
 
 export function Sidebar({
   engines,
-  selection,
+  variants,
   generating,
   loading,
-  onToggle,
+  onAdd,
+  onRemove,
   onVoiceChange,
   onSpeedChange,
 }: SidebarProps) {
-  const cards = (
+  const engineFor = (id: EngineId): Engine | undefined => engines.find((engine) => engine.id === id)
+  const variantCountByEngine = (id: EngineId): number => variants.filter((v) => v.engine === id).length
+
+  const variantCards = (
     <>
-      {engines.map((engine) => (
-        <EngineCard
-          key={engine.id}
-          engine={engine}
-          selected={selection[engine.id] !== undefined}
-          selection={selection[engine.id]}
-          generating={generating}
-          onToggle={() => onToggle(engine.id)}
-          onVoiceChange={(voice) => onVoiceChange(engine.id, voice)}
-          onSpeedChange={(speed) => onSpeedChange(engine.id, speed)}
-        />
-      ))}
+      {variants.map((variant) => {
+        const engine = engineFor(variant.engine)
+        if (!engine) return null
+        return (
+          <EngineCard
+            key={variant.id}
+            engine={engine}
+            variant={variant}
+            removable={variantCountByEngine(variant.engine) > 1}
+            generating={generating}
+            onRemove={() => onRemove(variant.id)}
+            onVoiceChange={(voice) => onVoiceChange(variant.id, voice)}
+            onSpeedChange={(speed) => onSpeedChange(variant.id, speed)}
+          />
+        )
+      })}
       {loading && engines.length === 0 && (
         <div className="flex flex-col gap-[10px]">
           {[0, 1, 2, 3].map((index) => (
@@ -53,6 +64,45 @@ export function Sidebar({
         </div>
       )}
     </>
+  )
+
+  // "add engine" picker: one tile per available engine, tap to append a variant
+  const addPicker = (
+    <div className="mt-[14px]">
+      <p className="mb-[8px] px-[2px] text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+        Додати рушій
+      </p>
+      <div className="grid grid-cols-2 gap-[8px]">
+        {engines
+          .filter((engine) => engine.available)
+          .map((engine) => {
+            const color = ENGINE_COLORS[engine.id]
+            return (
+              <button
+                key={engine.id}
+                type="button"
+                onClick={() => onAdd(engine.id)}
+                aria-label={`Додати ${engine.label}`}
+                className="flex items-center gap-[8px] rounded-[10px] border border-border-default bg-bg-base px-[10px] py-[8px] text-left transition-colors duration-150 hover:border-text-tertiary"
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] text-[10px] font-semibold"
+                  style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)` }}
+                >
+                  {ENGINE_MONOGRAMS[engine.id]}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-text-secondary">
+                  {engine.label}
+                </span>
+                <span className="shrink-0 text-text-tertiary">
+                  <PlusIcon />
+                </span>
+              </button>
+            )
+          })}
+      </div>
+    </div>
   )
 
   return (
@@ -64,9 +114,10 @@ export function Sidebar({
         </header>
         <div className="flex-1 overflow-y-auto px-[14px] py-[14px]">
           <p className="mb-[10px] px-[2px] text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
-            Рушії
+            Варіанти
           </p>
-          <div className="flex flex-col gap-[10px]">{cards}</div>
+          <div className="flex flex-col gap-[10px]">{variantCards}</div>
+          {addPicker}
         </div>
       </aside>
 
@@ -76,19 +127,47 @@ export function Sidebar({
           <Wordmark />
         </div>
         <div className="flex gap-[10px] overflow-x-auto px-[14px] py-[12px]">
-          {engines.map((engine) => (
-            <EngineCard
-              key={engine.id}
-              engine={engine}
-              compact
-              selected={selection[engine.id] !== undefined}
-              selection={selection[engine.id]}
-              generating={generating}
-              onToggle={() => onToggle(engine.id)}
-              onVoiceChange={(voice) => onVoiceChange(engine.id, voice)}
-              onSpeedChange={(speed) => onSpeedChange(engine.id, speed)}
-            />
-          ))}
+          {variants.map((variant) => {
+            const engine = engineFor(variant.engine)
+            if (!engine) return null
+            return (
+              <EngineCard
+                key={variant.id}
+                engine={engine}
+                variant={variant}
+                removable={variantCountByEngine(variant.engine) > 1}
+                generating={generating}
+                compact
+                onRemove={() => onRemove(variant.id)}
+                onVoiceChange={(voice) => onVoiceChange(variant.id, voice)}
+                onSpeedChange={(speed) => onSpeedChange(variant.id, speed)}
+              />
+            )
+          })}
+          {/* compact add buttons */}
+          {engines
+            .filter((engine) => engine.available)
+            .map((engine) => {
+              const color = ENGINE_COLORS[engine.id]
+              return (
+                <button
+                  key={`add-${engine.id}`}
+                  type="button"
+                  onClick={() => onAdd(engine.id)}
+                  aria-label={`Додати ${engine.label}`}
+                  className="flex h-full min-h-[64px] w-[52px] shrink-0 flex-col items-center justify-center gap-[6px] rounded-[14px] border border-dashed border-border-default bg-bg-base text-text-tertiary transition-colors duration-150 hover:border-text-tertiary"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] text-[10px] font-semibold"
+                    style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)` }}
+                  >
+                    {ENGINE_MONOGRAMS[engine.id]}
+                  </span>
+                  <PlusIcon />
+                </button>
+              )
+            })}
         </div>
       </div>
     </>

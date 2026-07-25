@@ -43,7 +43,7 @@ export function Composer({ text, generating, canGenerate, onTextChange, onGenera
               onTextChange(sample)
               textareaRef.current?.focus()
             }}
-            className="rounded-[10px] border border-border-default bg-bg-sunken px-[10px] py-[5px] text-[12px] text-text-secondary transition-colors duration-150 hover:border-border-emphasis hover:text-text-primary"
+            className="rounded-[10px] border border-border-default bg-bg-base px-[10px] py-[5px] text-[12px] text-text-secondary transition-colors duration-150 hover:border-text-tertiary hover:text-text-primary"
           >
             {sample}
           </button>
@@ -51,7 +51,7 @@ export function Composer({ text, generating, canGenerate, onTextChange, onGenera
       </div>
 
       {/* textarea */}
-      <div className="relative rounded-[14px] bg-bg-elevated transition-shadow duration-150 focus-within:shadow-[0_0_0_1px_var(--accent),0_0_0_5px_color-mix(in_srgb,var(--accent)_10%,transparent)]">
+      <div className="relative rounded-[14px] border border-border-default bg-bg-base transition-shadow duration-150 focus-within:border-accent focus-within:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_8%,transparent)]">
         <textarea
           ref={textareaRef}
           value={text}

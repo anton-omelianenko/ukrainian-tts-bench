@@ -112,7 +112,7 @@ export function AudioPlayer({ engine, audioUrl }: AudioPlayerProps) {
         href={audioUrl}
         download
         aria-label="Завантажити"
-        className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[10px] border border-transparent text-text-secondary transition-colors duration-150 hover:border-border-emphasis hover:text-text-primary"
+        className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[10px] border border-transparent text-text-secondary transition-colors duration-150 hover:border-text-tertiary hover:text-text-primary"
       >
         <DownloadIcon />
       </a>

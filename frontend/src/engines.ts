@@ -16,6 +16,12 @@ export const ENGINE_MONOGRAMS: Record<EngineId, string> = {
   espeak: 'ES',
 }
 
+let variantCounter = 0
+export function newVariantId(): string {
+  variantCounter += 1
+  return `v${variantCounter}-${Math.random().toString(36).slice(2, 8)}`
+}
+
 export function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
   const total = Math.floor(seconds)

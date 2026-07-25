@@ -30,6 +30,13 @@ export interface EngineSelection {
   speed: number
 }
 
+// One selected engine+voice+speed combination ("variant").
+// Several variants may share the same engine with different voices/speeds.
+export interface Variant extends EngineSelection {
+  id: string
+  engine: EngineId
+}
+
 export type SelectionMap = Partial<Record<EngineId, EngineSelection>>
 
 export interface GenerateEngineRequest {
